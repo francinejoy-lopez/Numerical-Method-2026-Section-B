@@ -1,0 +1,69 @@
+
+ENGINEERING DECISION & RECOMMENDATION
+=====================================
+
+Requirement: Approximation of y = L sin(θ) with less than 0.1% relative error.
+L = 20 m; angles of interest typically 1°–30°.
+
+1. Number of terms required
+   - Maclaurin (centered at 0°):
+     • 1°–5°: 2 terms suffice
+     • 10°: 3 terms
+     • 15°–20°: 3–4 terms
+     • 30°: 4 terms (sometimes more for safety)
+   - Taylor (centered at 10°):
+     • Near 10° (5°–15°): often only 2 terms needed
+     • Far from 10° (1° or 30°): still competitive or better than Maclaurin
+       at the same number of terms, but Maclaurin can catch up with extra terms.
+
+2. Percentage error achieved
+   With the minimum terms listed above, both series meet < 0.1% error.
+   At the expansion point, Taylor error is essentially zero even with few terms;
+   Maclaurin error grows monotonically with |θ|.
+
+3. Convergence behavior
+   - Both series converge for all real θ (entire complex plane actually).
+   - Rate of convergence is faster when |θ − a| is smaller.
+   - Maclaurin is optimal near 0°; Taylor at 10° is optimal near 10°.
+   - Adding terms always eventually reduces the error (alternating series with
+     decreasing terms after a point), but for a fixed N the error is smallest
+     near the expansion center.
+
+4. Computational simplicity vs. accuracy tradeoff
+   - 1-term Maclaurin (sin θ ≈ θ) is extremely cheap and accurate to < 0.1%
+     only up to roughly 4.5°. Beyond that it fails the tolerance.
+   - Implementing a short loop (3–4 terms) is still trivial in modern languages
+     and far cheaper than calling a library sin() if one is writing low-level
+     or embedded code, but in practice the library routine is preferred.
+   - Taylor requires evaluating sin(a) and cos(a) once (or hard-coding them)
+     and then a similar loop; the extra cost is negligible.
+
+5. Valid angle range for each solution
+   - Pure 1-term small-angle: safe only for |θ| ≲ 4.5°.
+   - Maclaurin with 4 terms: accurate to < 0.1% over the whole 0°–30° range
+     examined (and well beyond).
+   - Taylor centered at 10° with 3–4 terms: also covers 0°–30° with margin,
+     and is superior in a neighborhood around 10°.
+
+RECOMMENDATION
+--------------
+For a general-purpose civil-engineering calculation covering angles up to 30°
+and requiring < 0.1% error:
+
+• Prefer the exact library function math.sin() (or equivalent) whenever it is
+  available. It is already a highly optimized, correctly rounded implementation
+  of the Taylor/Maclaurin series (or minimax polynomial) and eliminates any
+  risk of under-truncation.
+
+• If an explicit series must be used (e.g., for pedagogical reasons, or on a
+  platform without a math library):
+  – Use the Maclaurin series with at least 4 terms for the 0°–30° range; or
+  – Use a Taylor series centered near the middle of the expected angle range
+    (here 10°) with 3–4 terms. This gives the best accuracy-per-term near the
+    design angles.
+
+• Never rely on the 1-term approximation beyond approximately 4.5° if
+  0.1% accuracy is mandatory.
+
+This choice balances computational simplicity, guaranteed accuracy, and
+engineering judgment about the operating range of the structure or survey.
