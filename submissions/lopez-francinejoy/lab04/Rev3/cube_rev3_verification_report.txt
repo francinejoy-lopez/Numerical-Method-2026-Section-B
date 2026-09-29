@@ -1,0 +1,129 @@
+==============================================================================
+CUBE REV. 3 â€” VERIFICATION REPORT
+10-section engineering audit of the Rev. 3 structural load solver
+==============================================================================
+
+1. MODEL GEOMETRY AND TOPOLOGY
+----------------------------------------
+  Cube edge L                = 6.0 m
+  Nodes                      = 8
+  Members                    = 12
+  Pinned supports            = nodes 1â€“4 (Y = 0; DX, DY, DZ restrained)
+  Active DOFs                = 36
+  Sections                   = Column W10X33, Roof/Tie Beam W12X26
+  Material                   = A992
+  Status                     = PASS (geometry from cube_structure_rev4, unchanged)
+
+2. UNIT DISCIPLINE (req. 11)
+----------------------------------------
+  Force                       kN
+  Distributed line load       kN/m
+  Moment                      kN.m
+  Self-weight density         kN/m^3 (unit weight)
+  Temperature                 degC (NOT a force unit)
+  Status                     = PASS (UnitValidationError on mismatch)
+
+3. LOAD-CASE DEFINITIONS (9 physical cases)
+----------------------------------------
+  Case 1: DEAD / SELF WEIGHT            symbol=D   self-weight
+  Case 2: ROOF DEAD                     symbol=D   distributed x4
+  Case 3: ROOF LIVE                     symbol=L   distributed x4
+  Case 4: ROOF BEAM CENTER LOAD         symbol=D   point x4
+  Case 5: WIND X                        symbol=W   nodal x4
+  Case 6: WIND Z                        symbol=W   nodal x4
+  Case 7: SEISMIC X                     symbol=E   nodal x4
+  Case 8: SEISMIC Z                     symbol=E   nodal x4
+  Case 9: TEMPERATURE +15               symbol=T   temperature
+  Status                     = PASS
+
+4. LOAD TOTALS / APPLICATION (req. 4, 13)
+----------------------------------------
+  Load Case 1 (DEAD / SELF WEIGHT, Dead Load) | self-weight 29.816 kN | distributed 0.000 kN | point 0.000 kN | nodal 0.000 kN | thermal restraint 0.000 kN | computed total 29.816 kN
+  Load Case 2 (ROOF DEAD, Dead Load) | self-weight 0.000 kN | distributed 120.000 kN | point 0.000 kN | nodal 0.000 kN | thermal restraint 0.000 kN | computed total 120.000 kN
+  Load Case 3 (ROOF LIVE, Live Load) | self-weight 0.000 kN | distributed 72.000 kN | point 0.000 kN | nodal 0.000 kN | thermal restraint 0.000 kN | computed total 72.000 kN
+  Load Case 4 (ROOF BEAM CENTER LOAD, Member Point Load) | self-weight 0.000 kN | distributed 0.000 kN | point 20.000 kN | nodal 0.000 kN | thermal restraint 0.000 kN | computed total 20.000 kN
+  Load Case 5 (WIND X, Wind) | self-weight 0.000 kN | distributed 0.000 kN | point 0.000 kN | nodal 10.000 kN | thermal restraint 0.000 kN | computed total 10.000 kN
+  Load Case 6 (WIND Z, Wind) | self-weight 0.000 kN | distributed 0.000 kN | point 0.000 kN | nodal 10.000 kN | thermal restraint 0.000 kN | computed total 10.000 kN
+  Load Case 7 (SEISMIC X, Seismic) | self-weight 0.000 kN | distributed 0.000 kN | point 0.000 kN | nodal 15.000 kN | thermal restraint 0.000 kN | computed total 15.000 kN
+  Load Case 8 (SEISMIC Z, Seismic) | self-weight 0.000 kN | distributed 0.000 kN | point 0.000 kN | nodal 15.000 kN | thermal restraint 0.000 kN | computed total 15.000 kN
+  Load Case 9 (TEMPERATURE +15, Temperature) | self-weight 0.000 kN | distributed 0.000 kN | point 0.000 kN | nodal 0.000 kN | thermal restraint 2265.466 kN | computed total 2265.466 kN
+  Notes:
+    â€¢ Roof dead = 5 kN/m UDL on M5â€“M8 (assumption â€” flagged)
+    â€¢ Case 4 centre point loads combined as D (assumption â€” flagged)
+    â€¢ Thermal total is restraint-force magnitude (self-equilibrating net force â‰ˆ 0)
+  Status                     = PASS (totals match design intent)
+
+5. DIAPHRAGM CONSTRAINT (req. 5, Phase 4)
+----------------------------------------
+  Diaphragm D1 'ROOF DIAPHRAGM': elevation Y = 6.0 m, master node 5, slaved nodes [6, 7, 8], coupled DOFs UX, UZ, RY (rigid in-plane translation + rotation about vertical axis; UY, RX, RZ left free)
+  Enforcement                = masterâ€“slave elimination in FrameModel
+  Status                     = PASS
+
+6. EQUIVALENT NODAL LOADS
+----------------------------------------
+  UDL                         fixed-end forces, global direction, transformed
+  Member point load           FEF at location a = Î¾Â·L (no new node)
+  Self-weight                 W = Î³Â·AÂ·L, gravity direction from SelfWeight.factor
+  Temperature                 self-equilibrating axial pair N = EAÂ·Î±Â·Î”T
+  Status                     = PASS
+
+7. ANALYSIS EQUILIBRIUM (req. 17)
+----------------------------------------
+  Case 1: eq. error = 1.78e-15 kN
+  Case 2: eq. error = 1.42e-14 kN
+  Case 3: eq. error = 3.33e-16 kN
+  Case 4: eq. error = 5.55e-17 kN
+  Case 5: eq. error = 3.18e-13 kN
+  Case 6: eq. error = 9.08e-13 kN
+  Case 7: eq. error = 4.73e-13 kN
+  Case 8: eq. error = 1.36e-12 kN
+  Case 9: eq. error = 6.37e-30 kN
+  Max |reaction + applied|   = 1.36e-12 kN
+  Status                     = PASS (numerical round-off only)
+
+8. NSCP LOAD COMBINATIONS (req. 15)
+----------------------------------------
+  Code                       = NSCP 2015 (7th ed.), Vol. I
+  Note                       = transcribed, NOT verified against the printed code — check §203.3.1 / §203.4.1 before design use
+  LRFD combinations          = 12 (ids 1â€“12)
+  ASD combinations           = 14 (ids 13â€“26)
+  Temperature combinations   = 4 (ids 27â€“30)
+  Not generated:
+    â€“ §203.4.1 eq. 203-10: D + H + F + (Lr or R)
+      reason: no Lr / R load case in the model (roof live is classed L)
+    â€“ §203.4.1 eq. 203-11 without T: D + 0.75L
+      reason: enveloped by D + L when Lr = R = 0; T variant is combination 30
+  Superposition              = factor Ã— referenced case vectors (no duplication)
+  Status                     = PASS (transcribed; verify against printed code)
+
+9. VIEWER / LOAD-APPLICATION CHECK (req. 12)
+----------------------------------------
+  Deliverable images:
+    rev3_load_case_1.png
+    rev3_load_case_2.png
+    rev3_load_case_3.png
+    rev3_load_case_4.png
+    rev3_load_case_5.png
+    rev3_load_case_6.png
+    rev3_load_case_7.png
+    rev3_load_case_8.png
+    rev3_load_case_9.png
+    rev3_combination_1.png   (LRFD 1.4D)
+    rev3_combination_13.png  (ASD D)
+  Viewer confirms HOW loads are applied; analysis correctness is Â§7.
+  Status                     = PASS
+
+10. ASSUMPTIONS AND LIMITATIONS
+----------------------------------------
+  A1  Open-section torsion J â‰ˆ Ix + Iy
+  A2  Roof dead implemented as 5 kN/m UDL (spec ambiguity)
+  A3  Case 4 (member centre loads) combined under symbol D
+  A4  NSCP equations transcribed, NOT verified against printed code
+  A5  Lr, R, S, F, H load cases absent â†’ some code equations omitted
+  A6  Thermal free vs fully restrained distinction preserved; partial
+      restraint is handled only by the global stiffness solve
+  Status                     = DOCUMENTED
+
+==============================================================================
+END OF REPORT
+==============================================================================
